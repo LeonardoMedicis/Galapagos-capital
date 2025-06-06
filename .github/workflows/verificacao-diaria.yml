@@ -1,0 +1,77 @@
+name: Verificação Diária de Conciliações
+
+on:
+  schedule:
+    # Executa todos os dias às 08:00 (horário de Brasília = UTC-3, então 11:00 UTC)
+    - cron: '0 11 * * *'
+  
+  # Permite execução manual
+  workflow_dispatch:
+  
+  # Executa em push para main (para testes)
+  push:
+    branches: [ main ]
+
+jobs:
+  verificar-conciliacoes:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+    
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Instalar dependências
+      run: |
+        python -m pip install --upgrade pip
+        cd automacao-conciliacoes
+        pip install -r requirements.txt
+    
+    - name: Executar verificação de conciliações
+      run: |
+        cd automacao-conciliacoes
+        python conciliacao_checker.py
+    
+    - name: Upload dos relatórios
+      uses: actions/upload-artifact@v3
+      with:
+        name: relatorios-conciliacao
+        path: |
+          automacao-conciliacoes/resultado_conciliacao.json
+          automacao-conciliacoes/relatorio_conciliacao.html
+          automacao-conciliacoes/conciliacao_checker.log
+    
+    - name: Atualizar GitHub Pages
+      if: success()
+      run: |
+        # Copia relatório HTML para pasta docs (GitHub Pages)
+        mkdir -p docs
+        cp automacao-conciliacoes/relatorio_conciliacao.html docs/index.html
+        cp automacao-conciliacoes/resultado_conciliacao.json docs/
+        
+        # Configura git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Commit e push das mudanças
+        git add docs/
+        git commit -m "Atualização automática do relatório de conciliações - $(date '+%d/%m/%Y %H:%M')" || exit 0
+        git push
+    
+    - name: Notificar problemas críticos
+      if: failure()
+      run: |
+        echo "🚨 Problemas críticos detectados na verificação de conciliações!"
+        echo "Verifique os logs e relatórios para mais detalhes."
+        # Aqui você pode adicionar integração com Teams, Slack, etc.
+    
+    - name: Enviar notificação de sucesso
+      if: success()
+      run: |
+        echo "✅ Verificação de conciliações executada com sucesso!"
+        echo "Relatório disponível em: https://leonardomedicis.github.io/Galapagos-capital/"
+

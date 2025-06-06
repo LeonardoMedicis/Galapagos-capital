@@ -1,0 +1,92 @@
+{
+  "configuracao": {
+    "diretorio_base": "C:\\Conciliacoes",
+    "horario_execucao": "08:00",
+    "timezone": "America/Sao_Paulo",
+    "email_notificacao": "equipe@galapagos.com.br"
+  },
+  "conciliacoes": {
+    "rentabilidade": {
+      "prioridade": "alta",
+      "arquivos": [
+        {
+          "nome": "Rentabilidade_Carteira_A_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Rentabilidade\\Carteira_A",
+          "descricao": "Conciliação de rentabilidade da Carteira A",
+          "criticidade": "alta"
+        },
+        {
+          "nome": "Rentabilidade_Carteira_B_{data}.xlsx", 
+          "caminho": "C:\\Conciliacoes\\Rentabilidade\\Carteira_B",
+          "descricao": "Conciliação de rentabilidade da Carteira B",
+          "criticidade": "alta"
+        },
+        {
+          "nome": "Rentabilidade_Consolidada_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Rentabilidade\\Consolidado",
+          "descricao": "Conciliação consolidada de rentabilidade",
+          "criticidade": "critica"
+        }
+      ]
+    },
+    "impostos": {
+      "prioridade": "alta",
+      "arquivos": [
+        {
+          "nome": "IR_Retido_Fonte_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Impostos\\IR",
+          "descricao": "Conciliação de IR retido na fonte",
+          "criticidade": "alta"
+        },
+        {
+          "nome": "IOF_Operacoes_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Impostos\\IOF", 
+          "descricao": "Conciliação de IOF sobre operações",
+          "criticidade": "media"
+        },
+        {
+          "nome": "PIS_COFINS_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Impostos\\PIS_COFINS",
+          "descricao": "Conciliação de PIS/COFINS",
+          "criticidade": "media"
+        }
+      ]
+    },
+    "outras": {
+      "prioridade": "media",
+      "arquivos": [
+        {
+          "nome": "Custodia_Titulos_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Custodia",
+          "descricao": "Conciliação de custódia de títulos",
+          "criticidade": "media"
+        },
+        {
+          "nome": "Liquidacao_D0_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Liquidacao",
+          "descricao": "Conciliação de liquidação D+0",
+          "criticidade": "alta"
+        },
+        {
+          "nome": "Fechamento_Dia_{data}.xlsx",
+          "caminho": "C:\\Conciliacoes\\Fechamento",
+          "descricao": "Conciliação de fechamento do dia",
+          "criticidade": "critica"
+        }
+      ]
+    }
+  },
+  "formatos_data": [
+    "%Y%m%d",
+    "%d%m%Y", 
+    "%Y-%m-%d",
+    "%d-%m-%Y"
+  ],
+  "notificacoes": {
+    "email_ativo": true,
+    "teams_ativo": false,
+    "slack_ativo": false,
+    "webhook_url": ""
+  }
+}
+
