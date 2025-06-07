@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Galapagos DTVM - {{ environment.title() }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: {% if environment == 'production' %}#28a745{% else %}#007bff{% endif %};
+            --secondary-color: {% if environment == 'production' %}#20c997{% else %}#6c757d{% endif %};
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .environment-badge {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            background: {% if environment == 'production' %}linear-gradient(45deg, #28a745, #20c997){% else %}linear-gradient(45deg, #007bff, #6610f2){% endif %};
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-sucesso { background: #d4edda; color: #155724; }
+        .status-erro { background: #f8d7da; color: #721c24; }
+        .status-executando { background: #fff3cd; color: #856404; }
+        .status-nunca { background: #e2e3e5; color: #383d41; }
+        
+        .btn-execute {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-execute:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .category-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .real-time-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: {% if environment == 'production' %}#28a745{% else %}#007bff{% endif %};
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Badge do Ambiente -->
+    <div class="environment-badge">
+        <i class="fas fa-{% if environment == 'production' %}industry{% else %}code{% endif %}"></i>
+        {{ environment.title() }}
+    </div>
+    
+    <!-- Indicador Tempo Real -->
+    <div class="real-time-indicator">
+        <i class="fas fa-wifi"></i>
+        {% if environment == 'production' %}Tempo Real{% else %}Desenvolvimento{% endif %}
+    </div>
+    
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-map"></i> Mapa de Conciliações</h1>
+            <p>Galapagos DTVM - Sistema de Monitoramento</p>
+            <p><small>Ambiente: {{ environment.title() }} | Atualização automática a cada 30s</small></p>
+        </div>
+        
+        <!-- Estatísticas Gerais -->
+        <div class="container-fluid p-4">
+            <div class="row" id="stats-container">
+                <!-- Estatísticas carregadas via JavaScript -->
+            </div>
+            
+            <!-- Controles Rápidos -->
+            <div class="text-center my-4">
+                <button class="btn btn-execute btn-lg mx-2" onclick="executarTodos()">
+                    <i class="fas fa-rocket"></i> Executar Todos
+                </button>
+                <button class="btn btn-execute btn-lg mx-2" onclick="executarCategoria('rentabilidade')">
+                    <i class="fas fa-chart-line"></i> Só Rentabilidade
+                </button>
+                <button class="btn btn-execute btn-lg mx-2" onclick="executarCategoria('impostos')">
+                    <i class="fas fa-money-bill"></i> Só Impostos
+                </button>
+                <button class="btn btn-outline-secondary btn-lg mx-2" onclick="atualizarDados()">
+                    <i class="fas fa-sync-alt"></i> Atualizar
+                </button>
+            </div>
+            
+            <!-- Módulos por Categoria -->
+            <div id="modules-container">
+                <!-- Módulos carregados via JavaScript -->
+            </div>
+            
+            <!-- Histórico de Execuções -->
+            <div class="category-section">
+                <h4><i class="fas fa-history"></i> Últimas Execuções</h4>
+                <div id="history-container">
+                    <!-- Histórico carregado via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuração global
+        const ENVIRONMENT = '{{ environment }}';
+        const IS_PRODUCTION = ENVIRONMENT === 'production';
+        const UPDATE_INTERVAL = IS_PRODUCTION ? 30000 : 10000; // 30s produção, 10s desenvolvimento
+        
+        // Estado da aplicação
+        let currentData = null;
+        let updateTimer = null;
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log(`Dashboard iniciado em modo: ${ENVIRONMENT}`);
+            atualizarDados();
+            iniciarAtualizacaoAutomatica();
+        });
+        
+        // Atualização automática
+        function iniciarAtualizacaoAutomatica() {
+            updateTimer = setInterval(atualizarDados, UPDATE_INTERVAL);
+            console.log(`Atualização automática configurada: ${UPDATE_INTERVAL/1000}s`);
+        }
+        
+        // Buscar dados da API
+        async function atualizarDados() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                currentData = data;
+                
+                atualizarEstatisticas(data);
+                atualizarModulos(data);
+                atualizarHistorico(data);
+                
+                console.log('Dados atualizados:', data.timestamp);
+            } catch (error) {
+                console.error('Erro ao atualizar dados:', error);
+                mostrarErro('Erro ao conectar com o servidor');
+            }
+        }
+        
+        // Atualizar estatísticas
+        function atualizarEstatisticas(data) {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <h3 class="text-primary">${data.total_modulos}</h3>
+                        <p>Total Módulos</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <h3 class="text-success">${data.modulos_implementados}</h3>
+                        <p>Implementados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <h3 class="text-warning">${data.modulos_desenvolvimento}</h3>
+                        <p>Em Desenvolvimento</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <h3 class="text-info">${data.taxa_sucesso}%</h3>
+                        <p>Taxa Sucesso</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Atualizar módulos
+        function atualizarModulos(data) {
+            const container = document.getElementById('modules-container');
+            const categorias = ['rentabilidade', 'impostos', 'outras'];
+            
+            let html = '';
+            
+            categorias.forEach(categoria => {
+                const modulosCategoria = data.ultimas_execucoes.filter(m => m.categoria === categoria);
+                const icone = categoria === 'rentabilidade' ? 'chart-line' : 
+                             categoria === 'impostos' ? 'money-bill' : 'cogs';
+                const cor = categoria === 'rentabilidade' ? 'success' : 
+                           categoria === 'impostos' ? 'danger' : 'warning';
+                
+                html += `
+                    <div class="category-section">
+                        <h4><i class="fas fa-${icone}"></i> ${categoria.charAt(0).toUpperCase() + categoria.slice(1)}</h4>
+                        <div class="row">
+                `;
+                
+                modulosCategoria.forEach(modulo => {
+                    const status = getStatusModulo(modulo);
+                    const tempoExecucao = modulo.tempo_execucao ? `${modulo.tempo_execucao.toFixed(2)}s` : '-';
+                    const ultimaExecucao = modulo.ultima_execucao ? 
+                        new Date(modulo.ultima_execucao).toLocaleString('pt-BR') : 'Nunca';
+                    
+                    html += `
+                        <div class="col-md-6">
+                            <div class="module-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>${modulo.nome.replace(/_/g, ' ')}</h6>
+                                        <small class="text-muted">Última: ${ultimaExecucao}</small><br>
+                                        <small class="text-muted">Tempo: ${tempoExecucao}</small>
+                                        ${modulo.usuario ? `<br><small class="text-muted">Por: ${modulo.usuario}</small>` : ''}
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="status-badge ${status.class}">${status.text}</span><br>
+                                        <button class="btn btn-execute btn-sm mt-2" 
+                                                onclick="executarModulo('${modulo.nome}')"
+                                                id="btn-${modulo.nome}">
+                                            <i class="fas fa-play"></i> Executar
+                                        </button>
+                                    </div>
+                                </div>
+                                ${modulo.erro ? `<div class="alert alert-danger mt-2 mb-0"><small>${modulo.erro}</small></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Atualizar histórico
+        function atualizarHistorico(data) {
+            const container = document.getElementById('history-container');
+            
+            if (data.ultimas_execucoes.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nenhuma execução registrada ainda.</p>';
+                return;
+            }
+            
+            let html = '<div class="table-responsive"><table class="table table-sm">';
+            html += '<thead><tr><th>Módulo</th><th>Data/Hora</th><th>Tempo</th><th>Status</th><th>Usuário</th></tr></thead><tbody>';
+            
+            data.ultimas_execucoes.slice(0, 10).forEach(exec => {
+                const status = exec.sucesso ? 
+                    '<span class="badge bg-success">Sucesso</span>' : 
+                    '<span class="badge bg-danger">Erro</span>';
+                const tempo = exec.tempo_execucao ? `${exec.tempo_execucao.toFixed(2)}s` : '-';
+                const dataHora = exec.ultima_execucao ? 
+                    new Date(exec.ultima_execucao).toLocaleString('pt-BR') : '-';
+                
+                html += `
+                    <tr>
+                        <td>${exec.nome.replace(/_/g, ' ')}</td>
+                        <td>${dataHora}</td>
+                        <td>${tempo}</td>
+                        <td>${status}</td>
+                        <td>${exec.usuario || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+        
+        // Executar módulo individual
+        async function executarModulo(nomeModulo) {
+            const btn = document.getElementById(`btn-${nomeModulo}`);
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.innerHTML = '<div class="loading"></div> Executando...';
+                btn.disabled = true;
+                
+                const response = await fetch(`/api/executar/${nomeModulo}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usuario: 'dashboard-user'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'iniciado') {
+                    mostrarSucesso(`Execução de ${nomeModulo} iniciada!`);
+                    
+                    // Atualizar dados após 3 segundos
+                    setTimeout(() => {
+                        atualizarDados();
+                    }, 3000);
+                } else {
+                    mostrarErro(`Erro ao executar ${nomeModulo}: ${result.erro}`);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao executar módulo:', error);
+                mostrarErro(`Erro ao executar ${nomeModulo}`);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        // Executar todos os módulos
+        async function executarTodos() {
+            if (!currentData) return;
+            
+            const modulos = currentData.ultimas_execucoes.map(m => m.nome);
+            mostrarInfo(`Executando ${modulos.length} módulos...`);
+            
+            for (const modulo of modulos) {
+                await executarModulo(modulo);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Aguardar 1s entre execuções
+            }
+        }
+        
+        // Executar por categoria
+        async function executarCategoria(categoria) {
+            if (!currentData) return;
+            
+            const modulos = currentData.ultimas_execucoes
+                .filter(m => m.categoria === categoria)
+                .map(m => m.nome);
+            
+            mostrarInfo(`Executando ${modulos.length} módulos de ${categoria}...`);
+            
+            for (const modulo of modulos) {
+                await executarModulo(modulo);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+        
+        // Utilitários
+        function getStatusModulo(modulo) {
+            if (!modulo.ultima_execucao) {
+                return { class: 'status-nunca', text: 'Nunca executado' };
+            } else if (modulo.sucesso) {
+                return { class: 'status-sucesso', text: 'Sucesso' };
+            } else {
+                return { class: 'status-erro', text: 'Erro' };
+            }
+        }
+        
+        function mostrarSucesso(mensagem) {
+            console.log('Sucesso:', mensagem);
+            // Implementar toast/notificação
+        }
+        
+        function mostrarErro(mensagem) {
+            console.error('Erro:', mensagem);
+            // Implementar toast/notificação
+        }
+        
+        function mostrarInfo(mensagem) {
+            console.info('Info:', mensagem);
+            // Implementar toast/notificação
+        }
+        
+        // Cleanup ao sair da página
+        window.addEventListener('beforeunload', function() {
+            if (updateTimer) {
+                clearInterval(updateTimer);
+            }
+        });
+    </script>
+</body>
+</html>
+
