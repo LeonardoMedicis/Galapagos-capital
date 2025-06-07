@@ -1,16 +1,28 @@
-name: Verificação Diária de Conciliações
+name: Verificação Manual de Conciliações
 
 on:
-  schedule:
-    # Executa todos os dias às 08:00 (horário de Brasília = UTC-3, então 11:00 UTC)
-    - cron: '0 11 * * *'
-  
-  # Permite execução manual
+  # Permite execução manual a qualquer momento
   workflow_dispatch:
+    inputs:
+      data_referencia:
+        description: 'Data de referência (YYYY-MM-DD) - deixe vazio para hoje'
+        required: false
+        default: ''
+      forcar_atualizacao:
+        description: 'Forçar atualização mesmo se não houver mudanças'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+        - 'false'
+        - 'true'
   
-  # Executa em push para main (para testes)
+  # Executa em push para main (apenas para testes de desenvolvimento)
   push:
     branches: [ main ]
+    paths: 
+      - 'automacao-conciliacoes/**'
+      - '.github/workflows/**'
 
 jobs:
   verificar-conciliacoes:
@@ -34,44 +46,94 @@ jobs:
     - name: Executar verificação de conciliações
       run: |
         cd automacao-conciliacoes
-        python conciliacao_checker.py
+        
+        # Configurar data de referência se fornecida
+        if [ "${{ github.event.inputs.data_referencia }}" != "" ]; then
+          echo "📅 Usando data de referência: ${{ github.event.inputs.data_referencia }}"
+          python conciliacao_checker.py --data "${{ github.event.inputs.data_referencia }}"
+        else
+          echo "📅 Usando data atual"
+          python conciliacao_checker.py
+        fi
+    
+    - name: Verificar se houve mudanças nos resultados
+      id: check_changes
+      run: |
+        cd automacao-conciliacoes
+        
+        # Verificar se arquivos de resultado existem e se mudaram
+        if [ -f "resultado_conciliacao.json" ] && [ -f "relatorio_conciliacao.html" ]; then
+          # Verificar se há mudanças no git
+          git add resultado_conciliacao.json relatorio_conciliacao.html
+          if git diff --cached --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "📊 Nenhuma mudança detectada nos resultados"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "📊 Mudanças detectadas nos resultados"
+          fi
+        else
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "📊 Primeiros resultados gerados"
+        fi
     
     - name: Upload dos relatórios
       uses: actions/upload-artifact@v3
       with:
-        name: relatorios-conciliacao
+        name: relatorios-conciliacao-${{ github.run_number }}
         path: |
           automacao-conciliacoes/resultado_conciliacao.json
           automacao-conciliacoes/relatorio_conciliacao.html
           automacao-conciliacoes/conciliacao_checker.log
+        retention-days: 30
     
     - name: Atualizar GitHub Pages
-      if: success()
+      if: steps.check_changes.outputs.changes == 'true' || github.event.inputs.forcar_atualizacao == 'true'
       run: |
-        # Copia relatório HTML para pasta docs (GitHub Pages)
+        # Criar pasta docs se não existir
         mkdir -p docs
+        
+        # Copiar relatórios para GitHub Pages
         cp automacao-conciliacoes/relatorio_conciliacao.html docs/index.html
         cp automacao-conciliacoes/resultado_conciliacao.json docs/
         
-        # Configura git
+        # Adicionar timestamp da última atualização
+        echo "Última atualização: $(date '+%d/%m/%Y às %H:%M:%S')" > docs/ultima_atualizacao.txt
+        
+        # Configurar git
         git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.name "GitHub Action - Conciliações"
         
         # Commit e push das mudanças
         git add docs/
-        git commit -m "Atualização automática do relatório de conciliações - $(date '+%d/%m/%Y %H:%M')" || exit 0
-        git push
+        git add automacao-conciliacoes/resultado_conciliacao.json automacao-conciliacoes/relatorio_conciliacao.html || true
+        
+        if git diff --cached --quiet; then
+          echo "📊 Nenhuma mudança para commit"
+        else
+          git commit -m "📊 Atualização manual do relatório de conciliações - $(date '+%d/%m/%Y %H:%M')"
+          git push
+          echo "✅ Dashboard atualizado com sucesso!"
+        fi
+    
+    - name: Pular atualização (sem mudanças)
+      if: steps.check_changes.outputs.changes == 'false' && github.event.inputs.forcar_atualizacao != 'true'
+      run: |
+        echo "⏭️ Nenhuma mudança detectada nos resultados."
+        echo "💡 Use 'Forçar atualização = true' se quiser atualizar mesmo assim."
     
     - name: Notificar problemas críticos
       if: failure()
       run: |
-        echo "🚨 Problemas críticos detectados na verificação de conciliações!"
+        echo "🚨 Erro na verificação de conciliações!"
         echo "Verifique os logs e relatórios para mais detalhes."
-        # Aqui você pode adicionar integração com Teams, Slack, etc.
+        echo "📧 Notifique a equipe de TI se o problema persistir."
     
-    - name: Enviar notificação de sucesso
+    - name: Resumo da execução
       if: success()
       run: |
         echo "✅ Verificação de conciliações executada com sucesso!"
-        echo "Relatório disponível em: https://leonardomedicis.github.io/Galapagos-capital/"
+        echo "📊 Dashboard disponível em: https://leonardomedicis.github.io/Galapagos-capital/"
+        echo "📅 Data de referência: $(date '+%d/%m/%Y')"
+        echo "🕐 Horário de execução: $(date '+%H:%M:%S')"
 

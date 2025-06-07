@@ -5,9 +5,9 @@
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-18+-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Produção-00C851?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Manual-orange?style=for-the-badge)
 
-**Sistema moderno para automação completa do processo de verificação de conciliações contábeis**
+**Sistema moderno para verificação manual e em tempo real de conciliações contábeis**
 
 [🚀 Demo ao Vivo](https://leonardomedicis.github.io/Galapagos-capital/) • [📊 Dashboard](#dashboard) • [🔧 Instalação](#instalação) • [📖 Documentação](#documentação)
 
@@ -26,8 +26,9 @@ O processo manual de verificação de conciliações contábeis na Galapagos DTV
 - 📱 **Limitado** - Acesso apenas local via Excel/VBA
 
 ### Solução Implementada
-Sistema automatizado que oferece:
-- ⚡ **Execução automática** - Verificação diária às 08:00 BRT
+Sistema sob demanda que oferece:
+- 🎯 **Execução manual** - Controle total sobre quando executar
+- ⚡ **Verificação rápida** - Resultados em menos de 30 segundos
 - 🎯 **100% de precisão** - Eliminação de erros humanos
 - 📊 **Dashboard em tempo real** - Visibilidade total do processo
 - 📈 **Histórico completo** - Auditoria e análise de tendências
@@ -39,8 +40,9 @@ Sistema automatizado que oferece:
 
 ### Funcionalidades Principais
 
-#### 1. **Verificação Automatizada de Arquivos**
+#### 1. **Verificação Manual de Arquivos**
 - Monitora **9 tipos diferentes** de conciliação contábil
+- Execução **sob demanda** via GitHub Actions ou localmente
 - Verifica existência de arquivos em diretórios específicos
 - Classifica problemas por **criticidade** (Crítica/Alta/Média)
 - Gera **relatórios detalhados** em JSON e HTML
@@ -52,9 +54,10 @@ Sistema automatizado que oferece:
 - **Categorização** por tipo (Rentabilidade, Impostos, Operacionais)
 - **Histórico** de execuções anteriores
 
-#### 3. **Automação Completa**
-- **Execução diária** via GitHub Actions
-- **Deploy automático** do dashboard
+#### 3. **Controle Manual Completo**
+- **Execução sob demanda** via interface GitHub
+- **Parâmetros personalizáveis** (data específica, forçar atualização)
+- **Deploy automático** do dashboard apenas quando há mudanças
 - **Notificações** em caso de problemas
 - **Backup** automático de relatórios
 
@@ -74,31 +77,33 @@ Sistema automatizado que oferece:
 
 ```mermaid
 graph TB
-    A[GitHub Actions<br/>Scheduler] --> B[Python Script<br/>conciliacao_checker.py]
+    A[Execução Manual<br/>GitHub Actions] --> B[Python Script<br/>conciliacao_checker.py]
     B --> C[Verificação de Arquivos<br/>Diretórios de Rede]
     C --> D[Processamento<br/>Análise de Resultados]
     D --> E[Geração de Relatórios<br/>JSON + HTML]
-    E --> F[Deploy Automático<br/>GitHub Pages]
+    E --> F[Deploy Condicional<br/>GitHub Pages]
     F --> G[Dashboard Web<br/>React Interface]
     
     H[config.json] --> B
     I[requirements.txt] --> B
     J[Logs & Histórico] --> E
+    K[Parâmetros Manuais] --> A
 ```
 
-### Fluxo de Execução
+### Fluxo de Execução Manual
 
-1. **🕐 08:00 BRT** - GitHub Actions dispara automaticamente
-2. **🔍 Verificação** - Script Python verifica todos os arquivos configurados
-3. **📊 Análise** - Classifica resultados por criticidade e categoria
-4. **📄 Relatórios** - Gera arquivos JSON (dados) e HTML (visualização)
-5. **🚀 Deploy** - Atualiza GitHub Pages com novos dados
-6. **🔔 Alertas** - Notifica em caso de problemas críticos
+1. **🎯 Decisão da Equipe** - Quando executar a verificação
+2. **▶️ Execução Manual** - Via GitHub Actions ou linha de comando
+3. **🔍 Verificação** - Script Python verifica todos os arquivos configurados
+4. **📊 Análise** - Classifica resultados por criticidade e categoria
+5. **📄 Relatórios** - Gera arquivos JSON (dados) e HTML (visualização)
+6. **🚀 Deploy Inteligente** - Atualiza GitHub Pages apenas se houver mudanças
+7. **🔔 Alertas** - Notifica em caso de problemas críticos
 
 ### Componentes Técnicos
 
 #### **Backend (Python)**
-- **`conciliacao_checker.py`** - Script principal de verificação
+- **`conciliacao_checker.py`** - Script principal com argumentos de linha de comando
 - **`config.json`** - Configurações de arquivos e caminhos
 - **`requirements.txt`** - Dependências Python
 
@@ -108,13 +113,109 @@ graph TB
 - **Responsividade** - Compatível com desktop e mobile
 
 #### **Automação (GitHub Actions)**
-- **`.github/workflows/verificacao-diaria.yml`** - Workflow de execução
-- **Agendamento** - Cron job para execução diária
-- **Deploy** - Publicação automática no GitHub Pages
+- **`.github/workflows/verificacao-diaria.yml`** - Workflow de execução manual
+- **Parâmetros** - Data específica e opções de execução
+- **Deploy Inteligente** - Atualiza apenas quando necessário
 
 ---
 
-## 🚀 Instalação
+## 🚀 Como utilizar?
+
+### 1. **Execução via GitHub (Recomendado)**
+
+#### Acesso Manual
+1. **Ir para Actions** no repositório GitHub
+2. **Clicar em "Verificação Manual de Conciliações"**
+3. **Clicar em "Run workflow"**
+4. **Configurar parâmetros** (opcional):
+   - **Data de referência:** YYYY-MM-DD (deixe vazio para hoje)
+   - **Forçar atualização:** true/false (atualiza mesmo sem mudanças)
+5. **Clicar em "Run workflow"**
+
+#### Parâmetros Disponíveis
+- **📅 Data de referência:** Para verificar conciliações de data específica
+- **🔄 Forçar atualização:** Para atualizar dashboard mesmo sem mudanças nos dados
+- **📊 Execução automática:** Apenas em push para desenvolvimento
+
+#### Dashboard Atualizado
+- **URL:** https://leonardomedicis.github.io/Galapagos-capital/
+- **Atualização:** Apenas quando há mudanças nos resultados
+- **Compatibilidade:** Desktop, tablet e mobile
+- **Dados:** Sempre refletem a última execução
+
+### 2. **Execução Local (Desenvolvimento/Teste)**
+
+#### Via Python Script
+```bash
+# Verificação para data atual
+python conciliacao_checker.py
+
+# Verificação para data específica
+python conciliacao_checker.py --data 2025-06-07
+
+# Execução com logs detalhados
+python conciliacao_checker.py --verbose
+
+# Simulação sem gerar arquivos
+python conciliacao_checker.py --dry-run
+
+# Combinando parâmetros
+python conciliacao_checker.py --data 2025-06-07 --verbose
+```
+
+#### Via Jupyter Notebook
+```python
+# Importar o sistema
+import sys
+sys.path.append('.')
+from conciliacao_checker import ConciliacaoChecker
+
+# Criar instância
+checker = ConciliacaoChecker()
+
+# Definir data específica (opcional)
+checker.definir_data_referencia('2025-06-07')
+
+# Executar verificação
+resultados = checker.verificar_conciliacoes()
+
+# Analisar resultados
+print(f"📊 Total de arquivos: {resultados['total_arquivos']}")
+print(f"✅ Encontrados: {resultados['arquivos_encontrados']}")
+print(f"❌ Faltando: {resultados['arquivos_faltando']}")
+print(f"📈 Taxa de sucesso: {resultados['taxa_sucesso']}%")
+
+# Visualizar problemas críticos
+problemas_criticos = resultados['problemas_criticos']
+if problemas_criticos:
+    print(f"\n🚨 {len(problemas_criticos)} problema(s) crítico(s):")
+    for problema in problemas_criticos:
+        print(f"   • {problema['nome_arquivo']} - {problema['criticidade'].upper()}")
+else:
+    print("\n✅ Nenhum problema crítico detectado!")
+
+# Gerar relatórios
+checker.gerar_relatorio_json(resultados)
+checker.gerar_relatorio_html(resultados)
+```
+
+### 3. **Quando Executar?**
+
+#### Momentos Recomendados
+- **🌅 Início do dia** - Verificar conciliações do dia anterior
+- **📊 Após processamentos** - Quando novos arquivos são gerados
+- **🔍 Investigação** - Para diagnosticar problemas específicos
+- **📈 Relatórios** - Antes de gerar relatórios para gestão
+- **🚨 Alertas** - Quando notificado sobre possíveis problemas
+
+#### Frequência Sugerida
+- **Diária:** Pelo menos uma vez por dia útil
+- **Sob demanda:** Sempre que necessário
+- **Investigativa:** Para datas específicas quando há dúvidas
+
+---
+
+## 🔧 Instalação
 
 ### Pré-requisitos
 - Python 3.11+
@@ -149,7 +250,6 @@ Edite o arquivo `config.json` com os caminhos reais dos seus arquivos:
 {
   "configuracao": {
     "diretorio_base": "\\\\servidor\\conciliacoes",
-    "horario_execucao": "08:00",
     "timezone": "America/Sao_Paulo"
   },
   "conciliacoes": {
@@ -166,9 +266,12 @@ Edite o arquivo `config.json` com os caminhos reais dos seus arquivos:
 }
 ```
 
-#### 4. Execute Localmente
+#### 4. Teste Localmente
 ```bash
-# Executar verificação
+# Executar verificação de teste
+python conciliacao_checker.py --dry-run
+
+# Executar verificação real
 python conciliacao_checker.py
 
 # Verificar saídas
@@ -195,104 +298,9 @@ npm run dev
 
 ---
 
-## 📖 Como utilizar?
-
-### 1. **Acesso via Web (Recomendado)**
-
-#### Dashboard Público
-- **URL:** https://leonardomedicis.github.io/Galapagos-capital/
-- **Atualização:** Automática diariamente às 08:00 BRT
-- **Compatibilidade:** Desktop, tablet e mobile
-- **Dados:** Sempre atualizados com última verificação
-
-#### Funcionalidades do Dashboard
-- 📊 **Visão Geral** - Cards com métricas principais
-- 🔍 **Detalhamento** - Lista completa de arquivos por categoria
-- 🚨 **Alertas** - Destaque para problemas críticos
-- 📈 **Histórico** - Data/hora da última execução
-- 🔄 **Atualização** - Botão para forçar nova verificação
-
-### 2. **Execução Manual (Desenvolvimento/Teste)**
-
-#### Via Python Script
-```bash
-# Executar verificação única
-python conciliacao_checker.py
-
-# Executar com logs detalhados
-python conciliacao_checker.py --verbose
-
-# Executar para data específica
-python conciliacao_checker.py --data 2025-06-07
-```
-
-#### Via Jupyter Notebook
-```python
-# Importar o sistema
-import sys
-sys.path.append('.')
-from conciliacao_checker import ConciliacaoChecker
-
-# Criar instância
-checker = ConciliacaoChecker()
-
-# Executar verificação
-resultados = checker.verificar_conciliacoes()
-
-# Analisar resultados
-print(f"Total de arquivos: {resultados['total_arquivos']}")
-print(f"Encontrados: {resultados['arquivos_encontrados']}")
-print(f"Faltando: {resultados['arquivos_faltando']}")
-
-# Visualizar problemas críticos
-problemas_criticos = [
-    r for r in resultados['resultados'] 
-    if not r['existe'] and r['criticidade'] in ['critica', 'alta']
-]
-
-for problema in problemas_criticos:
-    print(f"🚨 {problema['nome_arquivo']} - {problema['criticidade'].upper()}")
-```
-
-### 3. **Configuração Avançada**
-
-#### Personalizar Horário de Execução
-Edite `.github/workflows/verificacao-diaria.yml`:
-```yaml
-schedule:
-  # Para 09:00 BRT (12:00 UTC)
-  - cron: '0 12 * * *'
-```
-
-#### Adicionar Novas Conciliações
-Edite `config.json`:
-```json
-{
-  "nome": "Nova_Conciliacao_{data}.xlsx",
-  "caminho": "\\\\servidor\\nova_pasta",
-  "descricao": "Descrição da nova conciliação",
-  "criticidade": "alta"
-}
-```
-
-#### Configurar Notificações
-```python
-# Adicionar ao conciliacao_checker.py
-def enviar_notificacao_teams(dados):
-    webhook_url = "https://outlook.office.com/webhook/..."
-    payload = {
-        "@type": "MessageCard",
-        "summary": "Alerta de Conciliações",
-        "text": f"Problemas detectados: {len(dados)} arquivos"
-    }
-    requests.post(webhook_url, json=payload)
-```
-
----
-
 ## 📊 Dashboard
 
-### Métricas Principais
+### Funcionalidades do Dashboard
 
 #### Cards de Status
 - **📊 Total de Arquivos** - Quantidade total monitorada
@@ -325,52 +333,49 @@ def enviar_notificacao_teams(dados):
 | 🟠 **ALTA** | Laranja | Impacta relatórios principais | Ação no mesmo dia |
 | 🟡 **MÉDIA** | Amarelo | Impacta relatórios secundários | Ação em 24h |
 
+### Atualização Inteligente
+
+O dashboard é atualizado automaticamente apenas quando:
+- ✅ **Há mudanças** nos resultados da verificação
+- ✅ **Forçar atualização** está marcado como true
+- ✅ **Primeira execução** após implementação
+
+Isso evita commits desnecessários e mantém o histórico limpo.
+
 ---
 
-## 🔧 Configuração
+## 🔧 Configuração Avançada
 
-### Estrutura do config.json
+### Personalizar Execução
 
+#### Modificar Workflow
+Edite `.github/workflows/verificacao-diaria.yml` para:
+- Adicionar novos parâmetros de entrada
+- Modificar condições de deploy
+- Personalizar notificações
+
+#### Adicionar Novas Conciliações
+Edite `config.json`:
 ```json
 {
-  "configuracao": {
-    "diretorio_base": "\\\\servidor\\conciliacoes",
-    "horario_execucao": "08:00",
-    "timezone": "America/Sao_Paulo",
-    "email_notificacao": "equipe@galapagos.com.br",
-    "webhook_teams": "https://outlook.office.com/webhook/...",
-    "retries": 3,
-    "timeout": 30
-  },
-  "conciliacoes": {
-    "rentabilidade": {
-      "prioridade": "alta",
-      "descricao": "Conciliações de rentabilidade das carteiras",
-      "arquivos": [
-        {
-          "nome": "Rentabilidade_Carteira_A_{data}.xlsx",
-          "caminho": "\\\\servidor\\conciliacoes\\Rentabilidade\\Carteira_A",
-          "descricao": "Conciliação de rentabilidade da Carteira A",
-          "criticidade": "alta",
-          "horario_limite": "09:00"
-        }
-      ]
-    }
-  }
+  "nome": "Nova_Conciliacao_{data}.xlsx",
+  "caminho": "\\\\servidor\\nova_pasta",
+  "descricao": "Descrição da nova conciliação",
+  "criticidade": "alta"
 }
 ```
 
-### Variáveis de Ambiente
-
-```bash
-# Para execução local
-export CONCILIACAO_ENV=development
-export CONCILIACAO_LOG_LEVEL=DEBUG
-export CONCILIACAO_CONFIG_PATH=./config.json
-
-# Para produção (GitHub Actions)
-CONCILIACAO_ENV=production
-CONCILIACAO_LOG_LEVEL=INFO
+#### Configurar Notificações
+```python
+# Adicionar ao conciliacao_checker.py
+def enviar_notificacao_teams(dados):
+    webhook_url = "https://outlook.office.com/webhook/..."
+    payload = {
+        "@type": "MessageCard",
+        "summary": "Alerta de Conciliações",
+        "text": f"Problemas detectados: {len(dados)} arquivos"
+    }
+    requests.post(webhook_url, json=payload)
 ```
 
 ---
@@ -381,18 +386,17 @@ CONCILIACAO_LOG_LEVEL=INFO
 
 #### 1. **Logs de Execução**
 ```
-2025-06-07 08:00:01 - INFO - Iniciando verificação de conciliações
-2025-06-07 08:00:02 - INFO - Verificando categoria: rentabilidade
-2025-06-07 08:00:03 - WARNING - Arquivo não encontrado: Rentabilidade_Carteira_A_20250607.xlsx
-2025-06-07 08:00:05 - INFO - Verificação concluída: 3/9 arquivos encontrados
+2025-06-07 14:30:01 - INFO - 🚀 Iniciando ConciliacaoChecker (dry_run=False)
+2025-06-07 14:30:02 - INFO - 📂 Processando categoria: rentabilidade
+2025-06-07 14:30:03 - WARNING - 🚨 FALTANDO (ALTA): Rentabilidade_Carteira_A_20250607.xlsx
+2025-06-07 14:30:05 - INFO - 📊 RESUMO: 3/9 arquivos encontrados (33.3%)
 ```
 
-#### 2. **Logs de Sistema**
-```
-2025-06-07 08:00:01 - DEBUG - Carregando configuração de: config.json
-2025-06-07 08:00:01 - DEBUG - Timezone configurado: America/Sao_Paulo
-2025-06-07 08:00:02 - DEBUG - Conectando ao diretório: \\servidor\conciliacoes
-```
+#### 2. **Logs do GitHub Actions**
+- **Execução completa** com timestamps
+- **Parâmetros utilizados** na execução
+- **Resultados da verificação** resumidos
+- **Status do deploy** do dashboard
 
 ### Métricas de Performance
 
@@ -401,10 +405,10 @@ CONCILIACAO_LOG_LEVEL=INFO
 - **Máximo:** 60 segundos
 - **Timeout:** 120 segundos
 
-#### Taxa de Sucesso Histórica
-- **Meta:** 95%+ de arquivos encontrados
-- **Alerta:** <90% de arquivos encontrados
-- **Crítico:** <80% de arquivos encontrados
+#### Controle de Mudanças
+- **Deploy apenas quando necessário**
+- **Histórico limpo** no Git
+- **Artifacts preservados** por 30 dias
 
 ---
 
@@ -412,41 +416,41 @@ CONCILIACAO_LOG_LEVEL=INFO
 
 ### Problemas Comuns
 
-#### 1. **Arquivo não encontrado**
+#### 1. **Workflow não executa**
 ```
-Erro: FileNotFoundError: Rentabilidade_Carteira_A_20250607.xlsx
-```
-**Soluções:**
-- Verificar se o arquivo foi gerado pelo sistema origem
-- Confirmar formato da data no nome do arquivo
-- Verificar permissões de acesso ao diretório
-
-#### 2. **Erro de conexão de rede**
-```
-Erro: OSError: [Errno 2] No such file or directory: '\\servidor\conciliacoes'
+Erro: Workflow não aparece na lista
 ```
 **Soluções:**
-- Verificar conectividade com o servidor
-- Confirmar credenciais de acesso
-- Testar acesso manual ao diretório
+- Verificar se Actions estão habilitadas no repositório
+- Confirmar se arquivo workflow está em `.github/workflows/`
+- Verificar sintaxe YAML do arquivo
 
-#### 3. **Dashboard não atualiza**
+#### 2. **Dashboard não atualiza**
 ```
 Erro: Dados antigos no dashboard
 ```
 **Soluções:**
-- Verificar se GitHub Actions executou com sucesso
-- Confirmar se arquivos foram commitados
-- Limpar cache do navegador
+- Verificar se execução foi bem-sucedida
+- Usar "Forçar atualização = true" se necessário
+- Verificar se GitHub Pages está configurado
+
+#### 3. **Arquivo não encontrado**
+```
+Erro: FileNotFoundError: Rentabilidade_Carteira_A_20250607.xlsx
+```
+**Soluções:**
+- Verificar se arquivo foi gerado pelo sistema origem
+- Confirmar formato da data no nome do arquivo
+- Verificar permissões de acesso ao diretório
 
 ### Debugging
 
-#### Executar com Debug
+#### Executar com Debug Local
 ```bash
 # Logs detalhados
-python conciliacao_checker.py --debug
+python conciliacao_checker.py --verbose
 
-# Modo dry-run (não gera arquivos)
+# Modo simulação
 python conciliacao_checker.py --dry-run
 
 # Verificar configuração
@@ -487,7 +491,7 @@ python -c "import json; print(json.load(open('config.json')))"
 4. **Teste** localmente
 5. **Commit** com mensagem descritiva
    ```bash
-   git commit -m "feat: adicionar notificação por email"
+   git commit -m "feat: adicionar parâmetro de data personalizada"
    ```
 6. **Push** e abra um Pull Request
 
@@ -495,15 +499,15 @@ python -c "import json; print(json.load(open('config.json')))"
 
 #### Versão 1.1 (30 dias)
 - [ ] Notificações por email/Teams
-- [ ] Métricas históricas
-- [ ] Filtros avançados no dashboard
+- [ ] Histórico de execuções no dashboard
+- [ ] Filtros avançados por data
 - [ ] API REST para integrações
 
 #### Versão 1.2 (60 dias)
+- [ ] Agendamento flexível via interface
 - [ ] Autenticação e controle de acesso
 - [ ] Relatórios PDF automáticos
 - [ ] Integração com ERP
-- [ ] Mobile app
 
 ---
 
@@ -530,6 +534,8 @@ Este projeto é propriedade da **Galapagos DTVM**. Uso interno apenas.
 **Desenvolvido com ❤️ pela equipe Galapagos DTVM**
 
 *Sistema que elimina tarefas repetitivas para focar no que realmente gera valor*
+
+**Execução manual • Controle total • Resultados precisos**
 
 [⬆️ Voltar ao topo](#sistema-automatizado-de-conciliações-contábeis)
 
