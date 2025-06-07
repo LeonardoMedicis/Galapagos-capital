@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mapa de Conciliações - Galapagos DTVM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .success { color: #27ae60; }
+        .warning { color: #f39c12; }
+        .error { color: #e74c3c; }
+        .info { color: #3498db; }
+
+        .modules-section {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 2em;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .category-header {
+            padding: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+        }
+
+        .rentabilidade { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .impostos { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .outras { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+        .module-list {
+            padding: 20px;
+        }
+
+        .module-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .module-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .module-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-pronto {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-desenvolvimento {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .controls-section {
+            background: #2c3e50;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .controls-title {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .control-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .last-update {
+            background: #ecf0f1;
+            padding: 15px;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .category-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .alert {
+            margin: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🗺️ Mapa de Conciliações</h1>
+            <p>Galapagos DTVM - Sistema de Monitoramento em Tempo Real</p>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert alert-info">
+            <strong>💡 Dashboard Simplificado:</strong> Esta versão funciona sem Node.js! Para funcionalidades avançadas, configure o GitHub Pages ou use o notebook Python.
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number success">9</div>
+                <div class="stat-label">Total de Módulos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏗️</div>
+                <div class="stat-number warning">9</div>
+                <div class="stat-label">Em Desenvolvimento</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number success">0</div>
+                <div class="stat-label">Implementados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-number info">100%</div>
+                <div class="stat-label">Estrutura Pronta</div>
+            </div>
+        </div>
+
+        <!-- Modules Section -->
+        <div class="modules-section">
+            <h2 class="section-title">📁 Módulos por Categoria</h2>
+            
+            <div class="category-grid">
+                <!-- Rentabilidade -->
+                <div class="category-card">
+                    <div class="category-header rentabilidade">
+                        📈 Rentabilidade
+                    </div>
+                    <div class="module-list">
+                        <div class="module-item">
+                            <span class="module-name">Rentabilidade Carteira A</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">Rentabilidade Carteira B</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">Rentabilidade Consolidada</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Impostos -->
+                <div class="category-card">
+                    <div class="category-header impostos">
+                        💰 Impostos
+                    </div>
+                    <div class="module-list">
+                        <div class="module-item">
+                            <span class="module-name">IR Retido na Fonte</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">IOF Operações</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">PIS/COFINS</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outras -->
+                <div class="category-card">
+                    <div class="category-header outras">
+                        🔧 Operacionais
+                    </div>
+                    <div class="module-list">
+                        <div class="module-item">
+                            <span class="module-name">Custódia de Títulos</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">Liquidação D+0</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                        <div class="module-item">
+                            <span class="module-name">Fechamento do Dia</span>
+                            <span class="module-status status-desenvolvimento">Em Desenvolvimento</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <h2 class="controls-title">🎮 Controles de Execução</h2>
+            <div class="button-grid">
+                <button class="control-btn btn-primary" onclick="executarTodos()">
+                    🚀 Executar Todos
+                </button>
+                <button class="control-btn btn-success" onclick="executarRentabilidade()">
+                    📈 Executar Rentabilidade
+                </button>
+                <button class="control-btn btn-warning" onclick="executarImpostos()">
+                    💰 Executar Impostos
+                </button>
+                <button class="control-btn btn-info" onclick="gerarRelatorio()">
+                    📄 Gerar Relatório
+                </button>
+                <button class="control-btn btn-primary" onclick="abrirGitHub()">
+                    🔗 Abrir GitHub
+                </button>
+                <button class="control-btn btn-success" onclick="abrirNotebook()">
+                    📓 Abrir Notebook
+                </button>
+            </div>
+        </div>
+
+        <!-- Last Update -->
+        <div class="last-update">
+            <strong>Última atualização:</strong> <span id="lastUpdate"></span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2025 Galapagos DTVM - Sistema Automatizado de Conciliações</p>
+            <p>Desenvolvido com ❤️ pela equipe de tecnologia</p>
+        </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <button class="refresh-btn" onclick="atualizarDashboard()" title="Atualizar Dashboard">
+        🔄
+    </button>
+
+    <script>
+        // Atualizar timestamp
+        function atualizarTimestamp() {
+            const agora = new Date();
+            const timestamp = agora.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = timestamp;
+        }
+
+        // Funções dos botões
+        function executarTodos() {
+            alert('🚀 Executando todos os módulos...\n\nEsta funcionalidade será implementada quando os módulos estiverem prontos.\n\nPor enquanto, use o mapa central via Python:\npython automacao-conciliacoes/mapa_central.py --all');
+        }
+
+        function executarRentabilidade() {
+            alert('📈 Executando módulos de rentabilidade...\n\nComando: python automacao-conciliacoes/mapa_central.py --categoria rentabilidade');
+        }
+
+        function executarImpostos() {
+            alert('💰 Executando módulos de impostos...\n\nComando: python automacao-conciliacoes/mapa_central.py --categoria impostos');
+        }
+
+        function gerarRelatorio() {
+            alert('📄 Gerando relatório consolidado...\n\nComando: python automacao-conciliacoes/mapa_central.py --relatorio');
+        }
+
+        function abrirGitHub() {
+            window.open('https://github.com/LeonardoMedicis/Galapagos-capital', '_blank');
+        }
+
+        function abrirNotebook() {
+            window.open('https://github.com/LeonardoMedicis/Galapagos-capital/blob/main/Dashboard_Mapa_Conciliacoes.ipynb', '_blank');
+        }
+
+        function atualizarDashboard() {
+            atualizarTimestamp();
+            
+            // Simular carregamento
+            const btn = document.querySelector('.refresh-btn');
+            btn.innerHTML = '⏳';
+            btn.style.transform = 'rotate(360deg)';
+            
+            setTimeout(() => {
+                btn.innerHTML = '🔄';
+                btn.style.transform = 'scale(1)';
+                alert('✅ Dashboard atualizado!\n\nEm produção, este botão atualizará os dados em tempo real.');
+            }, 1000);
+        }
+
+        // Auto-refresh a cada 30 segundos
+        setInterval(atualizarTimestamp, 30000);
+
+        // Inicializar
+        atualizarTimestamp();
+
+        // Adicionar efeitos visuais
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animação de entrada
+            const cards = document.querySelectorAll('.stat-card, .category-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>
+
