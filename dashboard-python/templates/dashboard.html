@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Mapa de Conciliações - Galapagos DTVM</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .stats-row {
+            background: #f8f9fa;
+            padding: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            padding: 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .category-rentabilidade {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        }
+
+        .category-impostos {
+            background: linear-gradient(135deg, var(--danger-color), #c0392b);
+        }
+
+        .category-outras {
+            background: linear-gradient(135deg, var(--warning-color), #e67e22);
+        }
+
+        .module-list {
+            padding: 20px;
+        }
+
+        .module-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .module-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .module-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .module-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .status-sucesso {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-erro {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-desenvolvimento {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-executando {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .controls-section {
+            background: var(--primary-color);
+            padding: 30px;
+        }
+
+        .controls-title {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-custom {
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .last-update {
+            background: #ecf0f1;
+            padding: 15px;
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .main-container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-map"></i> Mapa de Conciliações</h1>
+            <p>Galapagos DTVM - Sistema Python de Monitoramento</p>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert alert-info alert-custom">
+            <i class="fas fa-info-circle"></i>
+            <strong>Dashboard Python:</strong> Sistema 100% Python com Flask, SQLite e Plotly. Atualização em tempo real!
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <p class="mt-3">Carregando dados...</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="row" id="statsContainer">
+                <!-- Stats serão carregadas via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h4><i class="fas fa-chart-pie"></i> Status por Categoria</h4>
+                        <div id="chartCategoria"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h4><i class="fas fa-chart-line"></i> Execuções Diárias</h4>
+                        <div id="chartExecucoes"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules Section -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="text-center my-4"><i class="fas fa-folder"></i> Módulos por Categoria</h2>
+                </div>
+            </div>
+            <div class="row" id="modulesContainer">
+                <!-- Módulos serão carregados via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <h2 class="controls-title"><i class="fas fa-gamepad"></i> Controles de Execução</h2>
+            <div class="text-center">
+                <button class="btn btn-primary btn-custom" onclick="executarTodos()">
+                    <i class="fas fa-rocket"></i> Executar Todos
+                </button>
+                <button class="btn btn-success btn-custom" onclick="executarCategoria('rentabilidade')">
+                    <i class="fas fa-chart-line"></i> Executar Rentabilidade
+                </button>
+                <button class="btn btn-warning btn-custom" onclick="executarCategoria('impostos')">
+                    <i class="fas fa-money-bill"></i> Executar Impostos
+                </button>
+                <button class="btn btn-info btn-custom" onclick="executarCategoria('outras')">
+                    <i class="fas fa-cogs"></i> Executar Operacionais
+                </button>
+                <button class="btn btn-secondary btn-custom" onclick="gerarRelatorio()">
+                    <i class="fas fa-file-alt"></i> Gerar Relatório
+                </button>
+                <button class="btn btn-dark btn-custom" onclick="abrirGitHub()">
+                    <i class="fab fa-github"></i> Abrir GitHub
+                </button>
+            </div>
+        </div>
+
+        <!-- Last Update -->
+        <div class="last-update">
+            <strong>Última atualização:</strong> <span id="lastUpdate"></span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2025 Galapagos DTVM - Sistema Python de Conciliações</p>
+            <p>Desenvolvido com <i class="fas fa-heart text-danger"></i> em Python + Flask</p>
+        </div>
+    </div>
+
+    <!-- Floating Refresh Button -->
+    <button class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" 
+            style="width: 60px; height: 60px; z-index: 1000;" 
+            onclick="atualizarDashboard()" 
+            title="Atualizar Dashboard">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Variáveis globais
+        let dadosStatus = {};
+        let intervalUpdate;
+
+        // Função para mostrar loading
+        function mostrarLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // Função para atualizar timestamp
+        function atualizarTimestamp() {
+            const agora = new Date();
+            const timestamp = agora.toLocaleString('pt-BR');
+            document.getElementById('lastUpdate').textContent = timestamp;
+        }
+
+        // Função para carregar status
+        async function carregarStatus() {
+            try {
+                mostrarLoading(true);
+                const response = await fetch('/api/status');
+                dadosStatus = await response.json();
+                
+                atualizarStats();
+                atualizarModulos();
+                atualizarGraficos();
+                atualizarTimestamp();
+                
+            } catch (error) {
+                console.error('Erro ao carregar status:', error);
+                mostrarAlerta('Erro ao carregar dados', 'danger');
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        // Função para atualizar estatísticas
+        function atualizarStats() {
+            const stats = [
+                {
+                    icon: 'fas fa-chart-bar',
+                    number: dadosStatus.total_modulos,
+                    label: 'Total de Módulos',
+                    color: 'info'
+                },
+                {
+                    icon: 'fas fa-hammer',
+                    number: dadosStatus.modulos_desenvolvimento,
+                    label: 'Em Desenvolvimento',
+                    color: 'warning'
+                },
+                {
+                    icon: 'fas fa-check-circle',
+                    number: dadosStatus.modulos_implementados,
+                    label: 'Implementados',
+                    color: 'success'
+                },
+                {
+                    icon: 'fas fa-percentage',
+                    number: dadosStatus.taxa_sucesso + '%',
+                    label: 'Taxa de Sucesso',
+                    color: 'primary'
+                }
+            ];
+
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = stats.map(stat => `
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-card">
+                        <div class="stat-icon text-${stat.color}">
+                            <i class="${stat.icon}"></i>
+                        </div>
+                        <div class="stat-number text-${stat.color}">${stat.number}</div>
+                        <div class="stat-label">${stat.label}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Função para atualizar módulos
+        async function atualizarModulos() {
+            try {
+                const response = await fetch('/api/modulos');
+                const modulos = await response.json();
+                
+                const categorias = {
+                    'rentabilidade': { nome: 'Rentabilidade', icon: 'fas fa-chart-line', class: 'rentabilidade' },
+                    'impostos': { nome: 'Impostos', icon: 'fas fa-money-bill', class: 'impostos' },
+                    'outras': { nome: 'Operacionais', icon: 'fas fa-cogs', class: 'outras' }
+                };
+
+                const container = document.getElementById('modulesContainer');
+                container.innerHTML = '';
+
+                Object.keys(categorias).forEach(categoria => {
+                    const modulosCategoria = modulos.filter(m => m.categoria === categoria);
+                    const catInfo = categorias[categoria];
+                    
+                    const cardHtml = `
+                        <div class="col-md-4">
+                            <div class="category-card">
+                                <div class="category-header category-${catInfo.class}">
+                                    <i class="${catInfo.icon}"></i> ${catInfo.nome}
+                                </div>
+                                <div class="module-list">
+                                    ${modulosCategoria.map(modulo => `
+                                        <div class="module-item">
+                                            <span class="module-name">${modulo.nome.replace(/_/g, ' ')}</span>
+                                            <span class="module-status status-${getStatusClass(modulo)}">
+                                                ${getStatusText(modulo)}
+                                            </span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.innerHTML += cardHtml;
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar módulos:', error);
+            }
+        }
+
+        // Função para obter classe do status
+        function getStatusClass(modulo) {
+            if (modulo.sucesso === 1) return 'sucesso';
+            if (modulo.sucesso === 0) return 'erro';
+            return 'desenvolvimento';
+        }
+
+        // Função para obter texto do status
+        function getStatusText(modulo) {
+            if (modulo.sucesso === 1) return 'Sucesso';
+            if (modulo.sucesso === 0) return 'Erro';
+            return 'Desenvolvimento';
+        }
+
+        // Função para atualizar gráficos
+        async function atualizarGraficos() {
+            try {
+                const response = await fetch('/api/graficos/performance');
+                const dados = await response.json();
+                
+                // Gráfico de categorias
+                const dadosCategoria = dadosStatus.categorias || [];
+                const traceCategoria = {
+                    labels: dadosCategoria.map(c => c.categoria),
+                    values: dadosCategoria.map(c => c.total),
+                    type: 'pie',
+                    marker: {
+                        colors: ['#27ae60', '#e74c3c', '#f39c12']
+                    }
+                };
+                
+                Plotly.newPlot('chartCategoria', [traceCategoria], {
+                    title: 'Distribuição por Categoria',
+                    height: 300
+                });
+
+                // Gráfico de execuções (simulado)
+                const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+                const execucoesSim = [12, 15, 8, 20, 18, 5, 3];
+                
+                const traceExecucoes = {
+                    x: diasSemana,
+                    y: execucoesSim,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#3498db', width: 3 },
+                    marker: { size: 8 }
+                };
+                
+                Plotly.newPlot('chartExecucoes', [traceExecucoes], {
+                    title: 'Execuções por Dia',
+                    height: 300,
+                    xaxis: { title: 'Dia da Semana' },
+                    yaxis: { title: 'Número de Execuções' }
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar gráficos:', error);
+            }
+        }
+
+        // Funções de execução
+        async function executarTodos() {
+            if (confirm('Executar todos os módulos? Isso pode demorar alguns minutos.')) {
+                try {
+                    mostrarAlerta('Executando todos os módulos...', 'info');
+                    const response = await fetch('/api/executar/todos', { method: 'POST' });
+                    const resultado = await response.json();
+                    
+                    if (resultado.status === 'iniciado') {
+                        mostrarAlerta('Execução iniciada com sucesso!', 'success');
+                        setTimeout(carregarStatus, 3000); // Atualizar após 3 segundos
+                    }
+                } catch (error) {
+                    mostrarAlerta('Erro ao executar módulos', 'danger');
+                }
+            }
+        }
+
+        async function executarCategoria(categoria) {
+            if (confirm(`Executar todos os módulos de ${categoria}?`)) {
+                try {
+                    mostrarAlerta(`Executando módulos de ${categoria}...`, 'info');
+                    const response = await fetch(`/api/executar/categoria/${categoria}`, { method: 'POST' });
+                    const resultado = await response.json();
+                    
+                    if (resultado.status === 'iniciado') {
+                        mostrarAlerta('Execução iniciada com sucesso!', 'success');
+                        setTimeout(carregarStatus, 3000);
+                    }
+                } catch (error) {
+                    mostrarAlerta('Erro ao executar categoria', 'danger');
+                }
+            }
+        }
+
+        function gerarRelatorio() {
+            window.open('/relatorio', '_blank');
+        }
+
+        function abrirGitHub() {
+            window.open('https://github.com/LeonardoMedicis/Galapagos-capital', '_blank');
+        }
+
+        // Função para mostrar alertas
+        function mostrarAlerta(mensagem, tipo) {
+            const alertaHtml = `
+                <div class="alert alert-${tipo} alert-dismissible fade show alert-custom" role="alert">
+                    ${mensagem}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Inserir no topo da página
+            const container = document.querySelector('.main-container');
+            container.insertAdjacentHTML('afterbegin', alertaHtml);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                const alerta = container.querySelector('.alert');
+                if (alerta) alerta.remove();
+            }, 5000);
+        }
+
+        // Função para atualizar dashboard
+        function atualizarDashboard() {
+            carregarStatus();
+            mostrarAlerta('Dashboard atualizado!', 'success');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarStatus();
+            
+            // Auto-refresh a cada 30 segundos
+            intervalUpdate = setInterval(carregarStatus, 30000);
+        });
+
+        // Cleanup ao sair da página
+        window.addEventListener('beforeunload', function() {
+            if (intervalUpdate) {
+                clearInterval(intervalUpdate);
+            }
+        });
+    </script>
+</body>
+</html>
+
